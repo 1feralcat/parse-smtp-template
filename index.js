@@ -10,10 +10,7 @@ const nodemailer = require("nodemailer")
  *
  * Required
  * @param {Object}   mailOptions                Parameters from the parse declaration.
- * @param {Object}   mailOptions.host           used to create the Transport frunction of nodemailer.
- * @param {Object}   mailOptions.port           used to create the Transport frunction of nodemailer.
- * @param {Object}   mailOptions.user           used to create the Transport frunction of nodemailer.
- * @param {Object}   mailOptions.password       used to create the Transport frunction of nodemailer.
+ * @param {Object}   mailOptions.mailTransport  used to create the Transport frunction of nodemailer.
  * @param {Object}   mailOptions.fromAddress    used to create the Transport frunction of nodemailer.
  * Optionals
  * /- nodemailer Option -/
@@ -44,8 +41,8 @@ const nodemailer = require("nodemailer")
  * @return {Object} returns one or three functions, depending if you are using multiTemplate
  */
 var SmtpMailAdapter = mailOptions => {
-    if (!mailOptions || !mailOptions.host || !mailOptions.port || !mailOptions.fromAddress || !mailOptions.user || !mailOptions.password) {
-        throw "SMTP mail adapter requires host, port, fromAddress, user and password"
+    if (!mailOptions || !mailOptions.transport || !mailOptions.fromAddress) {
+        throw "SMTP mail adapter requires mailTransport, fromAddress"
     }
 
     var _templates = mailOptions.template || false;
@@ -54,16 +51,7 @@ var SmtpMailAdapter = mailOptions => {
     var _multiLang = mailOptions.multiLang || false;
     var _multiLangColumn = mailOptions.multiLangColumn || "lang";
  
-    var transport = nodemailer.createTransport({
-        host: mailOptions.host,
-        port: mailOptions.port,
-        secure: mailOptions.secure || false,
-        auth: {
-            user: mailOptions.user,
-            pass: mailOptions.password
-        },
-        tls: { minVersion: "TLSv1" }
-    });
+    var transport = nodemailer.createTransport(mailOptions.transport);
 
     /**
      * Sends the emails with one template for both types (password recovery and email verification).
